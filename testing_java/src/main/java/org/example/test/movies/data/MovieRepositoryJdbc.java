@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 public class MovieRepositoryJdbc implements MovieRepository {
 
@@ -31,18 +32,27 @@ public class MovieRepositoryJdbc implements MovieRepository {
 
     @Override
     public Movie findById(long id) {
-        return null;
+        Object[] args= {id};
+        return template.queryForObject("SELECT * FROM movies WHERE id = ?",args,movieMapper);
     }
 
     @Override
     public Collection<Movie> findAll() {
-
-        
         return template.query("SELECT * FROM movies",movieMapper);
     }
 
     @Override
     public void saveOrUpdate(Movie movie) {
-
+        template.update("INSERT INTO movies (name,minutes,genre) VALUES  (?,?,?)",
+                movie.getName(),movie.getMinutes(),movie.getGenre().toString()
+                );
     }
+
+    @Override
+    public Collection<Movie> findByName(String name) {
+        Object[] args = {"%"+name.toLowerCase()+"%"};
+        return template.query("SELECT * FROM movies WHERE LOWER(name) LIKE ?",args,movieMapper);
+    }
+
+
 }
